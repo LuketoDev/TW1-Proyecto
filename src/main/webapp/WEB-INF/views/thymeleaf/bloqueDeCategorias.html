@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Categorías</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    .category-card {
+      border-radius: 15px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .category-card:hover img {
+      transform: scale(1.05);
+    }
+
+    .category-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .category-title {
+      position: absolute;
+      bottom: 10px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: white;
+      font-weight: bold;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 8px 0;
+    }
+
+    .category-wrapper {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      border-radius: 15px;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+  <h2 class="mb-4">Explorá nuestras <strong>categorías</strong></h2>
+  <div class="row g-4">
+
+    <!-- Categoría 1 -->
+    <div class="col-6 col-md-3">
+      <a href="procesadores.html" class="text-decoration-none">
+        <div class="category-card category-wrapper">
+          <img src="img/procesadores.jpg" alt="Procesadores" class="category-img">
+          <div class="category-title">PROCESADORES</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Categoría 2 -->
+    <div class="col-6 col-md-3">
+      <a href="perifericos.html" class="text-decoration-none">
+        <div class="category-card category-wrapper">
+          <img src="img/perifericos.jpg" alt="Periféricos" class="category-img">
+          <div class="category-title">PERIFÉRICOS</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Categoría 3 -->
+    <div class="col-6 col-md-3">
+      <a href="monitores.html" class="text-decoration-none">
+        <div class="category-card category-wrapper">
+          <img src="img/monitores.jpg" alt="Monitores" class="category-img">
+          <div class="category-title">MONITORES</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Categoría 4 -->
+    <div class="col-6 col-md-3">
+      <a href="placas_video.html" class="text-decoration-none">
+        <div class="category-card category-wrapper">
+          <img src="img/placas.jpg" alt="Placas de video" class="category-img">
+          <div class="category-title">PLACAS DE VIDEO</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Categoría 5 -->
+    <div class="col-6 col-md-3">
+      <a href="mothers.html" class="text-decoration-none">
+        <div class="category-card category-wrapper">
+          <img src="img/mothers.jpg" alt="Mothers" class="category-img">
+          <div class="category-title">MOTHERS</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Categoría 6 -->
+    <div class="col-6 col-md-3">
+      <a href="fuentes.html" class="text-decoration-none">
+        <div class="category-card category-wrapper">
+          <img src="img/fuentes.jpg" alt="Fuentes" class="category-img">
+          <div class="category-title">FUENTES</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Categoría 7 -->
+    <div class="col-6 col-md-3">
+      <a href="ram.html" class="text-decoration-none">
+        <div class="category-card category-wrapper">
+          <img src="img/ram.jpg" alt="Memorias RAM" class="category-img">
+          <div class="category-title">MEMORIAS RAM</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Categoría 8 -->
+    <div class="col-6 col-md-3">
+      <a href="almacenamiento.html" class="text-decoration-none">
+        <div class="category-card category-wrapper">
+          <img src="img/almacenamiento.jpg" alt="Almacenamiento" class="category-img">
+          <div class="category-title">ALMACENAMIENTO</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Categoría 9 -->
+    <div class="col-6 col-md-3">
+      <a href="impresoras.html" class="text-decoration-none">
+        <div class="category-card category-wrapper">
+          <img src="img/impresoras.jpg" alt="Impresoras" class="category-img">
+          <div class="category-title">IMPRESORAS E INSUMOS</div>
+        </div>
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
