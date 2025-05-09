@@ -6,7 +6,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 
     @Controller
-    public class ControladorProducto {
+    public class ControladorProductosNuevo {
 
         @GetMapping("/productosNuevo")
         public ModelAndView irAHome() {
