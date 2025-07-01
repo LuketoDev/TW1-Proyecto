@@ -29,13 +29,6 @@ public class ControladorLogin {
     }
 
 
-    @RequestMapping("/login")
-    public ModelAndView irALogin() {
-        ModelMap modelo = new ModelMap();
-        modelo.put("datosLogin", new DatosLoginDto());
-        return new ModelAndView("fragments/login", modelo);
-    }
-
 //    @RequestMapping(path = "/nuevo-login", method = RequestMethod.GET)
 //    public ModelAndView nuevoLogin() {
 //        ModelMap model = new ModelMap();
@@ -43,7 +36,7 @@ public class ControladorLogin {
 //        return new ModelAndView("fragments/login", model);
 //    }
 
-//    @RequestMapping(path = "/validar-login", method = RequestMethod.POST)
+    //    @RequestMapping(path = "/validar-login", method = RequestMethod.POST)
 //    public ModelAndView validarLogin(@ModelAttribute("datosLogin") DatosLoginDto datosLogin, HttpServletRequest request) {
 //        ModelMap model = new ModelMap();
 //
@@ -56,61 +49,58 @@ public class ControladorLogin {
 //        }
 //        return new ModelAndView("login", model);
 //    }
-    @RequestMapping(path = "/validar-login", method = RequestMethod.POST)
-    public ModelAndView validarLogin(@ModelAttribute("datosLogin") DatosLoginDto datosLogin,
-//                                     @RequestParam("redirectUrl") String redirectUrl,
-                                     HttpServletRequest request) {
-        ModelMap model = new ModelMap();
-
-//        Usuario usuarioBuscado = servicioLogin.consultarUsuario(datosLogin.getEmail(), datosLogin.getPassword());
-        Usuario usuarioBuscado = servicioLogin.obtenerUsuarioPorEmailYPassword(datosLogin.getEmail(), datosLogin.getPassword());
-        if (usuarioBuscado != null) {
-            request.getSession().setAttribute("ROL", usuarioBuscado.getRol());
-
-//            if (redirectUrl != null && redirectUrl.startsWith("/")) {
-//                return new ModelAndView("redirect:" + redirectUrl);
-//            }
-            return new ModelAndView("redirect:/index");
-        } else {
-            model.put("error", "Usuario o clave incorrecta");
-            return new ModelAndView("fragments/login", model);
-        }
+    @RequestMapping("/login")
+    public ModelAndView irALogin() {
+        ModelMap modelo = new ModelMap();
+        modelo.put("datosLogin", new DatosLoginDto());
+        return new ModelAndView("fragments/login", modelo);
     }
-
-
-
-
-//    @PostMapping("/validar-login")
-//    public ResponseEntity<?> validarLogin(@ModelAttribute("datosLogin") DatosLoginDto datosLogin,
-//                                          HttpServletRequest request) { // No need for response, model anymore
 //
-//        Usuario usuarioBuscado = servicioLogin.consultarUsuario(datosLogin.getEmail(), datosLogin.getPassword());
+//    @RequestMapping(path = "/validar-login", method = RequestMethod.POST)
+//    public ModelAndView validarLogin(@ModelAttribute("datosLogin") DatosLoginDto datosLogin,
+////                                     @RequestParam("redirectUrl") String redirectUrl,
+//                                     HttpServletRequest request) {
+//        ModelMap model = new ModelMap();
 //
+////        Usuario usuarioBuscado = servicioLogin.consultarUsuario(datosLogin.getEmail(), datosLogin.getPassword());
+//        Usuario usuarioBuscado = servicioLogin.obtenerUsuarioPorEmailYPassword(datosLogin.getEmail(), datosLogin.getPassword());
 //        if (usuarioBuscado != null) {
-//            // Success: User is valid, set session attribute and return "OK"
 //            request.getSession().setAttribute("ROL", usuarioBuscado.getRol());
-//            return ResponseEntity.ok("OK");
+//
+////            if (redirectUrl != null && redirectUrl.startsWith("/")) {
+////                return new ModelAndView("redirect:" + redirectUrl);
+////            }
+//            model.put("mensajeLoginExitoso", "El Login fue exitoso");
+//
+//            return new ModelAndView("redirect:/index", model);
 //        } else {
-//            // Failure: User is not valid. Let Spring render the fragment.
-//            // 1. Create a ModelAndView object, specifying the template path.
-//            //    IMPORTANT: You might need to specify the fragment name itself.
-//            //    Let's assume your form is wrapped in a div with id="login-form-content"
-//            ModelAndView modelAndView = new ModelAndView("fragments/login");
-//
-//            // 2. Add the objects required by the template to the ModelAndView.
-//            modelAndView.addObject("error", "Usuario o clave incorrecta");
-//            modelAndView.addObject("datosLogin", datosLogin); // The form-backing object
-//
-//            // 3. Return the ModelAndView within a ResponseEntity with the desired status code.
-//            //    Spring will now render the fragment using the full RequestContext.
-//            return new ResponseEntity<>(modelAndView, org.springframework.http.HttpStatus.UNAUTHORIZED);
+//            model.put("error", "Usuario o clave incorrecta");
+//            return new ModelAndView("fragments/login", model);
 //        }
 //    }
 
+@PostMapping("/validar-login")
+public ResponseEntity<String> validarLogin(@ModelAttribute("datosLogin") DatosLoginDto datosLogin,
+//                                           @RequestParam(value = "redirectUrl", required = false) String redirectUrl,
+                                           HttpServletRequest request,
+                                           HttpServletResponse response,
+                                           Model model) {
 
+    Usuario usuario = servicioLogin.obtenerUsuarioPorEmailYPassword(datosLogin.getEmail(), datosLogin.getPassword());
 
+    if (usuario != null) {
+        request.getSession().setAttribute("ROL", usuario.getRol());
+        // Le decimos al JS que redireccione
+        return ResponseEntity.status(202).body("REDIRECT:/index");
+    }
 
+    model.addAttribute("error", "Usuario o clave incorrecta");
+    model.addAttribute("datosLogin", datosLogin);
 
+    // Renderizamos el HTML del fragmento con el error
+    String html = fragmentRenderer.render("fragments/login :: login", model, request, response);
+    return ResponseEntity.status(401).body(html);
+}
 
     @RequestMapping(path = "/registrarme", method = RequestMethod.POST)
     public ModelAndView registrarme(@ModelAttribute("usuario") Usuario usuario, @RequestParam("redirectUrl") String redirectUrl) {

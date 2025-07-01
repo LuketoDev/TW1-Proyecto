@@ -12,10 +12,5 @@ public class GlobalControllerAdvice {
         return new DatosLoginDto();
     }
 
-//    @ModelAttribute("usuario")
-//    public Usuario usuario() {
-//        return new Usuario();
-//    }
-
 
 }

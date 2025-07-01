@@ -31,6 +31,42 @@ fetch("/login")
         document.querySelector("#loginModal .modal-content").innerHTML = html;
     });
 
+document.addEventListener("submit", function (e) {
+    const form = e.target;
+    if (!form.matches("form[data-ajax]")) return;
+
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    const action = form.getAttribute("action") || form.action;
+
+    fetch(action, {
+        method: "POST",
+        body: formData,
+    })
+        .then(async (response) => {
+            const text = await response.text();
+
+            if (response.status === 202) {
+                // Redirección después del login exitoso
+                const url = text.replace("REDIRECT:", "");
+                window.location.href = url;
+            } else if (response.status === 401) {
+                // Error de login: renderizamos el fragmento HTML con errores
+                document.querySelector("#loginModal .modal-content").innerHTML = text;
+                asignarHandlersLogin(); // Vuelve a enganchar el botón "Registrarme"
+            } else {
+                console.warn("Respuesta inesperada:", response.status);
+                console.log(text);
+            }
+        })
+        .catch(err => {
+            console.error("Error en la solicitud de login:", err);
+        });
+});
+
+
+
 
 
 
@@ -51,8 +87,13 @@ function obtenerCantidadCarritoAjax() {
 window.addEventListener('DOMContentLoaded', () => {
     asignarHandlersLogin();
     const modal = document.getElementById('modalRegistroExitoso');
+    const modalLoginExitoso = document.getElementById('modalLoginExitoso');
     if (modal) {
         const bootstrapModal = new bootstrap.Modal(modal);
+        bootstrapModal.show();
+    }
+    if (modalLoginExitoso) {
+        const bootstrapModal = new bootstrap.Modal(modalLoginExitoso);
         bootstrapModal.show();
     }
 });
