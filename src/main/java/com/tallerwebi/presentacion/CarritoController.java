@@ -2,16 +2,12 @@ package com.tallerwebi.presentacion;
 
 import com.tallerwebi.dominio.ServicioDeEnviosImpl;
 import com.tallerwebi.dominio.ServicioPrecios;
-import com.tallerwebi.dominio.ServicioPreciosImpl;
 import com.tallerwebi.dominio.ServicioProductoCarritoImpl;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.*;
 
 @RestController
@@ -93,6 +89,7 @@ public class CarritoController {
         ProductoCarritoDto productoBuscado = this.productoService.buscarPorId(id);
 
         if (productoBuscado != null) {
+            this.productoService.devolverStockAlComponente(id, productoBuscado.getCantidad());
             this.productoService.getProductos().remove(productoBuscado);
             response.put("eliminado", true);
         } else {
@@ -141,10 +138,13 @@ public class CarritoController {
             response.put("mensajeDescuento", "Codigo de descuento invalido!");
             return response;
         }
+
         Double valorTotalConDescuento = this.productoService.calcularDescuento(codigoDescuentoExtraido);
 
-        response.put("mensaje", "Descuento aplicado! Nuevo total: $" + valorTotalConDescuento.toString());
-        response.put("valorTotal", valorTotalConDescuento);
+        String valorTotalFormateado = this.servicioPrecios.conversionDolarAPeso(valorTotalConDescuento);
+
+        response.put("mensaje", "Descuento aplicado! Nuevo total: $" + valorTotalFormateado);
+        response.put("valorTotal", valorTotalFormateado); // Ahora envías el String formateado
 
         return response;
     }
@@ -238,73 +238,74 @@ public class CarritoController {
             response.put("error", "Debes seleccionar un metodo de pago");
             return response;
         }
-
+        if (metodoDePago.equalsIgnoreCase("tarjetaCredito")) {
+            response.put("success", true);
+            response.put("redirect", "/tarjetaDeCredito");
+            return response;
+        }
         if ("mercadoPago".equalsIgnoreCase(metodoDePago)) {
             if (this.envioActual == null || this.codigoPostalActual == null) {
                 response.put("success", false);
                 response.put("error", "Debes agregar un codigo postal");
                 return response;
             }
-
             response.put("success", true);
             response.put("metodoPago", "mercadoPago");
             response.put("costoEnvio", envioActual.getCosto());
-
         } else {
-            response.put("success", true);
-            response.put("metodoPago", metodoDePago);
+            response.put("success", false);
+            response.put("error", "Método de pago no soportado: " + metodoDePago);
         }
-
         return response;
     }
 
-    @PostMapping(path = "/carritoDeCompras/calcularEnvio")
-    public ModelAndView calcularEnvio(@RequestParam(value = "codigoPostal", required = false) String codigoPostal, HttpSession session) {
-
-        ModelMap model = new ModelMap();
-        List<ProductoCarritoDto> carritoSesion = obtenerCarritoDeSesion(session);
-        this.productoService.setProductos(carritoSesion);
-
-        this.codigoPostalActual = codigoPostal;
-
-        model.put("productos", this.productoService.getProductos());
-
-        Double total = this.productoService.calcularValorTotalDeLosProductos();
-
-        model.put("valorTotal", total);
-        model.put("codigoPostal", codigoPostal);
-
-        try {
-            if (codigoPostal != null && !codigoPostal.trim().isEmpty()) {
-                if (!codigoPostal.matches("\\d{4}")) {
-                    model.put("errorEnvio", "El código postal debe tener 4 dígitos");
-                    model.put("envioCalculado", false);
-                    model.put("sinCobertura", false);
-                } else {
-                    EnvioDto envio = servicioDeEnvios.calcularEnvio(codigoPostal);
-
-                    if (envio != null) {
-                        this.envioActual = envio;
-                        model.put("envio", envio);
-                        Double totalConEnvio = total + envio.getCosto();
-
-                        model.put("totalConEnvio", totalConEnvio);
-                        model.put("envioCalculado", true);
-                        model.put("sinCobertura", false);
-                    } else {
-                        model.put("envioCalculado", false);
-                        model.put("sinCobertura", true);
-                        model.put("mensajeEnvio", "No disponemos de envío Andreani para este código postal");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            model.put("errorEnvio", "Error al calcular envío. Intenta nuevamente.");
-            model.put("envioCalculado", false);
-            model.put("sinCobertura", false);
-        }
-        return new ModelAndView("carritoDeCompras", model);
-    }
+//    @PostMapping(path = "/carritoDeCompras/calcularEnvio")
+//    public ModelAndView calcularEnvio(@RequestParam(value = "codigoPostal", required = false) String codigoPostal, HttpSession session) {
+//
+//        ModelMap model = new ModelMap();
+//        List<ProductoCarritoDto> carritoSesion = obtenerCarritoDeSesion(session);
+//        this.productoService.setProductos(carritoSesion);
+//
+//        this.codigoPostalActual = codigoPostal;
+//
+//        model.put("productos", this.productoService.getProductos());
+//
+//        Double total = this.productoService.calcularValorTotalDeLosProductos();
+//
+//        model.put("valorTotal", total);
+//        model.put("codigoPostal", codigoPostal);
+//
+//        try {
+//            if (codigoPostal != null && !codigoPostal.trim().isEmpty()) {
+//                if (!codigoPostal.matches("\\d{4}")) {
+//                    model.put("errorEnvio", "El código postal debe tener 4 dígitos");
+//                    model.put("envioCalculado", false);
+//                    model.put("sinCobertura", false);
+//                } else {
+//                    EnvioDto envio = servicioDeEnvios.calcularEnvio(codigoPostal);
+//
+//                    if (envio != null) {
+//                        this.envioActual = envio;
+//                        model.put("envio", envio);
+//                        Double totalConEnvio = total + envio.getCosto();
+//
+//                        model.put("totalConEnvio", totalConEnvio);
+//                        model.put("envioCalculado", true);
+//                        model.put("sinCobertura", false);
+//                    } else {
+//                        model.put("envioCalculado", false);
+//                        model.put("sinCobertura", true);
+//                        model.put("mensajeEnvio", "No disponemos de envío Andreani para este código postal");
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            model.put("errorEnvio", "Error al calcular envío. Intenta nuevamente.");
+//            model.put("envioCalculado", false);
+//            model.put("sinCobertura", false);
+//        }
+//        return new ModelAndView("carritoDeCompras", model);
+//    }
 
     @GetMapping(path = "/carritoDeCompras/calcularEnvio")
     @ResponseBody

@@ -1,6 +1,7 @@
 package com.tallerwebi.presentacion;
 
 import com.tallerwebi.dominio.ServicioArmaTuPc;
+import com.tallerwebi.dominio.ServicioPrecios;
 import com.tallerwebi.dominio.entidades.Componente;
 import com.tallerwebi.dominio.excepcion.ComponenteDeterminateDelArmadoEnNullException;
 import com.tallerwebi.dominio.excepcion.LimiteDeComponenteSobrepasadoEnElArmadoException;
@@ -15,16 +16,20 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.ParseException;
 import java.util.*;
 
 @Controller
 public class ControladorArmaTuPc {
 
     private ServicioArmaTuPc servicioArmaTuPc;
+    private ServicioPrecios servicioPrecios;
     private List<String> pasos = Arrays.asList("procesador", "motherboard", "cooler", "memoria", "gpu", "almacenamiento", "fuente", "gabinete", "monitor", "periferico", "resumen");
 
     @Autowired
-    public ControladorArmaTuPc(ServicioArmaTuPc servicioArmaTuPc) { this.servicioArmaTuPc =  servicioArmaTuPc; }
+    public ControladorArmaTuPc(ServicioArmaTuPc servicioArmaTuPc, ServicioPrecios servicioPrecios) {this.servicioArmaTuPc =  servicioArmaTuPc;this.servicioPrecios = servicioPrecios;}
     public ControladorArmaTuPc() {}
 
      private ArmadoPcDto obtenerArmadoPcDtoDeLaSession(HttpSession session) {
@@ -49,7 +54,7 @@ public class ControladorArmaTuPc {
                     ? this.servicioArmaTuPc.obtenerListaDeComponentesCompatiblesFiltradosDto(tipoComponente, query, armadoPcDto)
                     : this.servicioArmaTuPc.obtenerListaDeComponentesCompatiblesDto(tipoComponente, armadoPcDto);
 
-            model.put("componentesLista", componentesCompatiblesADevolver);
+            model.put("componentesLista", this.pasarPreciosAPesos(componentesCompatiblesADevolver));
 
         } catch (ComponenteDeterminateDelArmadoEnNullException e) {
             model.put("errorLista", e.getMessage());
@@ -64,6 +69,14 @@ public class ControladorArmaTuPc {
         model.put("pasoSiguiente", obtenerPasoSiguiente(tipoComponente));
 
         return new ModelAndView("arma-tu-pc/tradicional/" + tipoComponente, model);
+    }
+
+    private List<ComponenteDto> pasarPreciosAPesos(List<ComponenteDto> componentesCompatiblesADevolver) {
+
+        for (ComponenteDto componente : componentesCompatiblesADevolver) {
+            if (componente != null) componente.setPrecioFormateado(this.servicioPrecios.conversionDolarAPeso(componente.getPrecio()));
+        }
+        return componentesCompatiblesADevolver;
     }
 
     private String obtenerPasoSiguiente(String tipoComponente) {
@@ -116,6 +129,10 @@ public class ControladorArmaTuPc {
             model.put("errorLimite", "Supero el limite de "+tipoComponente+" de su armado");
             return new ModelAndView("redirect:/arma-tu-pc/tradicional/" + tipoComponente, model);
         }
+
+        armadoPcDtoConComponenteAgregado.setPrecioFormateado(
+                this.servicioPrecios.conversionDolarAPeso(armadoPcDtoConComponenteAgregado.getPrecioTotal())
+                );
 
         session.setAttribute("armadoPcDto", armadoPcDtoConComponenteAgregado);
 
