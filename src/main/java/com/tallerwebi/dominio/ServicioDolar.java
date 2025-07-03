@@ -24,7 +24,7 @@ public class ServicioDolar {
 
     public synchronized Double obtenerCotizacionDolarBlue() {
         long ahora = System.currentTimeMillis();
-        Double ultimaCotizacionCacheada = cotizacionCacheada;
+        Double ultimaCotizacionCacheada = (cotizacionCacheada != null) ? cotizacionCacheada : 1200.0;
         if (cotizacionCacheada == null || (ahora - ultimoUpdate) > DURACION_CACHE_MILLIS) {
             try {
                 Map<String, Object> response = restTemplate.getForObject(API_URL, Map.class);
