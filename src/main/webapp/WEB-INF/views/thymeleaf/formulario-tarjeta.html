@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pagar con Tarjeta</title>
+  <script src="https://sdk.mercadopago.com/js/v2"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    .field {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    #submit-button {
+      margin-top: 20px;
+      padding: 10px;
+      width: 100%;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Pago con Tarjeta</h2>
+<p>Total a pagar: <span id="totalDisplay">$0.00</span></p>
+
+<form id="payment-form">
+  <div class="field">
+    <label for="cardNumber">Número de tarjeta</label>
+    <input type="text" id="cardNumber" maxlength="19" placeholder="1234 5678 9012 3456" />
+  </div>
+
+  <div class="field">
+    <label for="expirationMonth">Mes de vencimiento (MM)</label>
+    <input type="text" id="expirationMonth" maxlength="2" placeholder="Ej: 09" />
+  </div>
+
+  <div class="field">
+    <label for="expirationYear">Año de vencimiento (YY)</label>
+    <input type="text" id="expirationYear" maxlength="2" placeholder="Ej: 26" />
+  </div>
+
+  <div class="field">
+    <label for="securityCode">Código de seguridad (CVV)</label>
+    <input type="text" id="securityCode" maxlength="4" placeholder="123" />
+  </div>
+
+  <div class="field">
+    <label for="cardholderName">Nombre del titular</label>
+    <input type="text" id="cardholderName" placeholder="Como aparece en la tarjeta" />
+  </div>
+
+  <div class="field">
+    <label for="email">Correo electrónico</label>
+    <input type="email" id="email" placeholder="correo@ejemplo.com" />
+  </div>
+
+  <div class="field">
+    <label for="identificationType">Tipo de documento</label>
+    <select id="identificationType">
+      <option value="DNI">DNI</option>
+      <option value="CI">Cédula de Identidad</option>
+      <option value="PAS">Pasaporte</option>
+      <option value="LC">Libreta Cívica</option>
+      <option value="LE">Libreta de Enrolamiento</option>
+      <option value="CUIT">CUIT</option>
+      <option value="CUIL">CUIL</option>
+      <option value="OTHER">Otro</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="identificationNumber">Número de documento</label>
+    <input type="text" id="identificationNumber" placeholder="Número sin puntos ni guiones" />
+  </div>
+
+  <input type="hidden" id="paymentMethodId" name="paymentMethodId" />
+
+  <button type="submit" id="submit-button">Pagar</button>
+</form>
+
+<script>
+  // Total que viene por parámetro ?total=xx o 0 por defecto
+  const total = new URLSearchParams(window.location.search).get("total") || "0";
+  document.getElementById("totalDisplay").textContent = "$" + parseFloat(total).toFixed(2);
+
+  // Inicialización MercadoPago con public key TEST (poner la tuya)
+  const mp = new MercadoPago("TEST-312ea46e-dc42-4553-bffa-d911779e3396");
+
+  const paymentMethodInput = document.getElementById("paymentMethodId");
+  let currentIssuerId = null;
+
+  // Escuchar cuando el usuario ingresa el número de tarjeta para detectar método y issuerId
+  const cardNumberElement = document.getElementById("cardNumber");
+
+  cardNumberElement.addEventListener("input", async () => {
+    const cleanCardNumber = cardNumberElement.value.replace(/\s/g, "");
+    if (cleanCardNumber.length >= 6) {
+      const bin = cleanCardNumber.substring(0, 6);
+      try {
+        const paymentMethods = await mp.getPaymentMethods({ bin });
+        console.log(paymentMethods);
+        if (paymentMethods.length > 0) {
+          paymentMethodInput.value = paymentMethods[0].id;
+          currentIssuerId = await getIssuerId(bin);
+        } else {
+          paymentMethodInput.value = "";
+          currentIssuerId = null;
+        }
+      } catch (error) {
+        console.error("Error al obtener paymentMethodId:", error);
+        paymentMethodInput.value = "";
+        currentIssuerId = null;
+      }
+    }
+  });
+
+  async function getIssuerId(bin) {
+    try {
+      const issuers = await mp.getIssuers({ bin });
+      if (issuers.length > 0) {
+        return issuers[0].id;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error("Error obteniendo issuerId:", error);
+      return null;
+    }
+  }
+
+  // Form submit
+  document.getElementById("payment-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    // Obtener datos del formulario
+    const cardData = {
+      cardNumber: document.getElementById("cardNumber").value.replace(/\s+/g, ''),
+      expirationMonth: document.getElementById("expirationMonth").value,
+      expirationYear: document.getElementById("expirationYear").value,
+      securityCode: document.getElementById("securityCode").value,
+      cardholderName: document.getElementById("cardholderName").value,
+      identificationType: document.getElementById("identificationType").value,
+      identificationNumber: document.getElementById("identificationNumber").value,
+    };
+
+    // Validaciones básicas
+    if (!paymentMethodInput.value) {
+      alert("Por favor, ingresa un número de tarjeta válido para detectar el método de pago.");
+      return;
+    }
+    if (!currentIssuerId) {
+      alert("No se pudo detectar el issuerId de la tarjeta.");
+      return;
+    }
+    if (!cardData.cardNumber || !cardData.expirationMonth || !cardData.expirationYear || !cardData.securityCode || !cardData.cardholderName || !cardData.identificationNumber) {
+      alert("Por favor, completa todos los campos obligatorios.");
+      return;
+    }
+
+    try {
+      // Crear token de tarjeta
+      const { id: token } = await mp.createCardToken({
+        cardNumber: cardData.cardNumber,
+        expirationMonth: cardData.expirationMonth,
+        expirationYear: cardData.expirationYear,
+        securityCode: cardData.securityCode,
+        cardholder: {
+          name: cardData.cardholderName,
+          identification: {
+            type: cardData.identificationType,  // <--- asegurate de enviarlo
+            number: cardData.identificationNumber
+          }
+        }
+      });
+
+      // Enviar pago al backend
+      const response = await fetch("/checkout/api-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token,
+          transactionAmount: parseFloat(total),
+          description: "Compra en sitio",
+          installments: 1,
+          paymentMethodId: paymentMethodInput.value,
+          issuerId: currentIssuerId,
+          payer: {
+            email: document.getElementById("email").value,
+            identification: {
+              type: cardData.identificationType,
+              number: cardData.identificationNumber
+            }
+          }
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.status === "approved") {
+        alert("Pago aprobado 🎉");
+        window.location.href = "/pagoExitoso";
+      } else {
+        alert("Pago rechazado: " + (result.status_detail || "Sin detalle"));
+      }
+
+    } catch (error) {
+      console.error("Error al generar token o procesar pago:", error);
+      alert("Error al procesar el pago o datos inválidos.");
+    }
+  });
+</script>
+
+</body>
+</html>

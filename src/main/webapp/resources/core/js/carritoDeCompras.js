@@ -123,9 +123,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && metodoSeleccionado.value === "mercadoPago") {
-                        crearFormularioMercadoPago(data);
-                        btnComprar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Redirigiendo a MercadoPago...';
-                        btnComprar.disabled = true;
+                        window.location.href = "/formulario-tarjeta?total=" + encodeURIComponent(data.valorTotal);
+
+                        // crearFormularioMercadoPago(data);
+                        // btnComprar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Redirigiendo a MercadoPago...';
+                        // btnComprar.disabled = true;
                     }
                     if ( data.success && metodoSeleccionado.value === "tarjetaCredito" && data.redirect ) {
                         window.location.href = data.redirect;

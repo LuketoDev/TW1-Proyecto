@@ -3,6 +3,7 @@ package com.tallerwebi.presentacion;
 import com.tallerwebi.dominio.ServicioDeEnviosImpl;
 import com.tallerwebi.dominio.ServicioPrecios;
 import com.tallerwebi.dominio.ServicioProductoCarritoImpl;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -10,7 +11,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpSession;
 import java.util.*;
 
-@RestController
+@Controller
 public class CarritoController {
 
     private final ServicioProductoCarritoImpl productoService;
@@ -228,6 +229,17 @@ public class CarritoController {
         return response;
     }
 
+    @GetMapping("/formulario-tarjeta")
+    public ModelAndView mostrarFormularioTarjeta(@RequestParam(value = "total", required = false) String total) {
+        if (total == null || total.isEmpty()) {
+            total = "0.00";
+        }
+
+        ModelMap model = new ModelMap();
+        model.addAttribute("total", total);
+        return new ModelAndView("formulario-tarjeta", model);
+    }
+
     @PostMapping(path = "/carritoDeCompras/formularioPago")
     @ResponseBody
     public Map<String, Object> procesarCompra(@RequestParam(value = "metodoPago") String metodoDePago) {
@@ -238,24 +250,34 @@ public class CarritoController {
             response.put("error", "Debes seleccionar un metodo de pago");
             return response;
         }
+
         if (metodoDePago.equalsIgnoreCase("tarjetaCredito")) {
             response.put("success", true);
             response.put("redirect", "/tarjetaDeCredito");
             return response;
         }
+
         if ("mercadoPago".equalsIgnoreCase(metodoDePago)) {
             if (this.envioActual == null || this.codigoPostalActual == null) {
                 response.put("success", false);
                 response.put("error", "Debes agregar un codigo postal");
                 return response;
             }
+
+            Double totalFinal = productoService.valorTotalConDescuento;
+            if (totalFinal == null || totalFinal <= 0) {
+                totalFinal = productoService.valorTotal; // fallback
+            }
+
             response.put("success", true);
             response.put("metodoPago", "mercadoPago");
             response.put("costoEnvio", envioActual.getCosto());
-        } else {
-            response.put("success", false);
-            response.put("error", "Método de pago no soportado: " + metodoDePago);
+            response.put("valorTotal", totalFinal); // 👈 NECESARIO PARA EL REDIRECT AL FORMULARIO
+            return response;
         }
+
+        response.put("success", false);
+        response.put("error", "Método de pago no soportado: " + metodoDePago);
         return response;
     }
 
