@@ -1,22 +1,19 @@
 package com.tallerwebi.punta_a_punta;
 
 import com.microsoft.playwright.*;
-import com.tallerwebi.punta_a_punta.vistas.VistaCoolers;
-import com.tallerwebi.punta_a_punta.vistas.VistaProductos;
-import com.tallerwebi.punta_a_punta.vistas.VistaWeb;
+import com.tallerwebi.punta_a_punta.vistas.*;
 import org.junit.jupiter.api.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VistaProductosE2E {
-
 
     static Playwright playwright;
     static Browser browser;
     BrowserContext context;
-    VistaProductos vistaProductos;
     VistaCoolers vistaCoolers;
 
     @BeforeAll
@@ -24,7 +21,6 @@ public class VistaProductosE2E {
         playwright = Playwright.create();
         browser = playwright.chromium().launch();
         browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false).setSlowMo(500));
-
     }
 
     @AfterAll
@@ -36,8 +32,8 @@ public class VistaProductosE2E {
     void crearContextoYPagina() {
         context = browser.newContext();
         Page page = context.newPage();
-        vistaProductos = new VistaProductos(page);
         vistaCoolers = new VistaCoolers(page);
+        vistaCoolers.ir();
     }
 
     @AfterEach
@@ -46,8 +42,7 @@ public class VistaProductosE2E {
     }
 
     @Test
-    public void CuandoLeDoyClickAUnMismoItemOnceVecesSeSumaDiezVecesYObtengoUnMensajeDeError(){
-        vistaCoolers.darClickCoolers();
+    public void CuandoLeDoyClickAUnMismoItemOnceVecesSeSumaDiezVecesYObtengoUnMensajeDeError() {
         vistaCoolers.darClickEnAgregarPrimerProductoAlCarrito();
         vistaCoolers.darClickEnAgregarPrimerProductoAlCarrito();
         vistaCoolers.darClickEnAgregarPrimerProductoAlCarrito();
@@ -59,14 +54,13 @@ public class VistaProductosE2E {
         vistaCoolers.darClickEnAgregarPrimerProductoAlCarrito();
         vistaCoolers.darClickEnAgregarPrimerProductoAlCarrito();
         vistaCoolers.darClickEnAgregarPrimerProductoAlCarrito();
-        String mensajeError = vistaCoolers.obtenerMensajeDeError();
+        String mensajeError = vistaCoolers.obtenerMensajeDeErrorCooler();
 
         assertThat(mensajeError, equalTo("Stock insuficiente"));
     }
 
     @Test
     public void deberiaAgregarUnProductoAlCarrito() {
-        vistaCoolers.darClickCoolers();
 
         vistaCoolers.darClickEnAgregarPrimerProductoAlCarrito();
 

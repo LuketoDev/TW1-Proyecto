@@ -5,6 +5,9 @@ import com.tallerwebi.punta_a_punta.vistas.VistaIndex;
 import com.tallerwebi.punta_a_punta.vistas.VistaLogin;
 import org.junit.jupiter.api.*;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
+
 public class VistaIndexE2E {
 
     static Playwright playwright;
@@ -16,7 +19,7 @@ public class VistaIndexE2E {
     static void abrirNavegador() {
         playwright = Playwright.create();
         browser = playwright.chromium().launch();
-        browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false).setSlowMo(50));
+//        browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false).setSlowMo(50));
 
     }
 
@@ -38,11 +41,15 @@ public class VistaIndexE2E {
     }
 
     @Test
-    public void CuandoLeDoyClickAUnMismoItemCincoVecesSeSUmaCincoVeces(){
-        vistaIndex.darClickEnBotonCarrito();
-        vistaIndex.darClickEnBotonCarrito();
-        vistaIndex.darClickEnBotonCarrito();
-        vistaIndex.darClickEnBotonCarrito();
-        vistaIndex.darClickEnBotonCarrito();
+    public void CuandoLeDoyClickAProductosMeLlevaALaPaginaProductos(){
+      vistaIndex.darClickEnBotonProductos();
+        String url = vistaIndex.obtenerURLActual();
+        assertThat(url, containsStringIgnoringCase("/productos"));
+    }
+    @Test
+    public void CuandoLeDoyClickAIngresaMeLlevaALaPaginaLogin(){
+        vistaIndex.darClickEnBotonIngresa();
+        String url = vistaIndex.obtenerURLActual();
+        assertThat(url, containsStringIgnoringCase("/login"));
     }
 }
