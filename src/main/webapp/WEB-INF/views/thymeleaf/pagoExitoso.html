@@ -246,8 +246,9 @@
         </div>
     </div>
 </div>
-<a th:href="@{/index.html}" class="exito-volver">Volver al inicio</a>
-<button class="btn btn-primary mt-3 col-md-4" id="btn-imprimir">Exportar PDF</button>
+<div class="d-flex justify-content-center gap-3">
+    <a th:href="@{/index.html}" class="btn btn-primary mt-3 col-md-4">Volver al inicio</a>
+    <button class="btn btn-primary mt-3 col-md-4" id="btn-imprimir">Exportar PDF</button>
 </div>
 <div th:replace="fragments/fragments :: footer"></div>
 <!-- FontAwesome para el icono de check -->
