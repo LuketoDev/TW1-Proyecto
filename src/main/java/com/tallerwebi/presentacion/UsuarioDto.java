@@ -3,7 +3,8 @@ package com.tallerwebi.presentacion;
 import com.tallerwebi.dominio.Usuario;
 
 public class UsuarioDto {
-    
+
+    private Long id;
     private String nombre;
     private String apellido;
     private String email;
@@ -21,8 +22,25 @@ public class UsuarioDto {
         this.rol = "user";
     }
 
+    public UsuarioDto(Usuario usuario) {
+        this.id = usuario.getId();
+        this.nombre = usuario.getNombre();
+        this.apellido = usuario.getApellido();
+        this.email = usuario.getEmail();
+        this.telefono = usuario.getTelefono();
+        this.dni = usuario.getDni();
+        this.rol = "user";
+    }
+
     public UsuarioDto(){};
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getRol(){
         return rol;

@@ -126,7 +126,7 @@
                             </thead>
                             <tbody >
                             <tr th:if="${productos != null and !productos.isEmpty()}" class="text-center" th:each="producto : ${productos}">
-                                <td><img th:src="'http://www.imagenestaller.free.nf/' + ${producto.imagen}"
+                                <td><img th:src="'https://Carla-Stramandinoli.github.io/imagenes-taller/imagenes/' + ${producto.imagen}"
                                          style="height: 30px; width: 30px"></td>
                                 <td th:text="${producto.nombre}"
                                     style="max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></td>
@@ -149,7 +149,7 @@
                             </tr>
                             <tr class="text-center" th:if="${productosArmados != null and !productosArmados.isEmpty()}"
                                 th:each="productoArmado : ${productosArmados}">
-                                <td><img th:src="'http://www.imagenestaller.free.nf/' + ${productoArmado.imagen}"
+                                <td><img th:src="'https://Carla-Stramandinoli.github.io/imagenes-taller/imagenes/' + ${productoArmado.imagen}"
                                          style="height: 30px; width: 30px"></td>
                                 <td th:utext="${productoArmado.nombre} + '<br><b> Armado ' + ${productoArmado.numeroDeArmadoAlQuePertenece} + '</b>'"
                                     style="max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></td>

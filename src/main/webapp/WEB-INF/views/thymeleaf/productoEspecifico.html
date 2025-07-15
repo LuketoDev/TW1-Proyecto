@@ -18,13 +18,13 @@
             <!-- Imagen grande -->
             <div class="text-center mb-3">
                 <img id="mainImage"
-                     th:src="'http://www.imagenestaller.free.nf/' + ${componenteEspecificoDto.imagenes[0]}"
+                     th:src="'https://Carla-Stramandinoli.github.io/imagenes-taller/imagenes/' + ${componenteEspecificoDto.imagenes[0]}"
                      class="img-fluid img-thumbnail" alt="Imagen principal" style="max-height: 400px;">
             </div>
             <!-- Miniaturas -->
             <div class="d-flex gap-2 flex-wrap justify-content-center">
                 <img th:each="imagen : ${componenteEspecificoDto.imagenes}"
-                     th:src="'http://www.imagenestaller.free.nf/' + ${imagen}" class="img-thumbnail thumb-img"
+                     th:src="'https://Carla-Stramandinoli.github.io/imagenes-taller/imagenes/' + ${imagen}" class="img-thumbnail thumb-img"
                      th:alt="${imagen}" style="width: 100px; height: auto; cursor: pointer;">
             </div>
         </div>
@@ -188,7 +188,7 @@
         <div class="articulo-fijo">
             <div class="centrado-superior">
                 <div class="etiqueta-articulo">Este artículo</div>
-                <img th:src="'http://www.imagenestaller.free.nf/' + ${componenteEspecificoDto.imagenes[0]}"
+                <img th:src="'https://Carla-Stramandinoli.github.io/imagenes-taller/imagenes/' + ${componenteEspecificoDto.imagenes[0]}"
                      class="img-fluid img-thumbnail"
                      alt="Imagen principal"
                      style="max-height: 199px;">
@@ -219,7 +219,7 @@
                 <a th:href="@{/productoEspecifico/{id}(id=${componente.id})}"
                    class="centrado-superior text-decoration-none">
                     <div class="etiqueta-recomendacion">Recomendación</div>
-                    <img th:src="'http://www.imagenestaller.free.nf/' + ${componente.imagenes[0]}"
+                    <img th:src="'https://Carla-Stramandinoli.github.io/imagenes-taller/imagenes/' + ${componente.imagenes[0]}"
                          class="img-fluid img-thumbnail"
                          alt="Imagen principal"
                          style="max-height: 199px;">

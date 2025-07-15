@@ -20,7 +20,7 @@
                     <tbody>
                     <tr th:if="${productos != null and !productos.isEmpty()}" class="text-center"
                         th:each="producto : ${productos}">
-                        <td><img th:src="'http://www.imagenestaller.free.nf/' + ${producto.imagen}"
+                        <td><img th:src="'https://Carla-Stramandinoli.github.io/imagenes-taller/imagenes/' + ${producto.imagen}"
                                  style="height: 30px; width: 30px"></td>
                         <td th:text="${producto.nombre}"></td>
                         <td class="precioTotalDelProducto" th:text="'$' + ${producto.precioFormateado}"></td>
@@ -42,7 +42,7 @@
 
                     <tr th:if="${productosArmados != null and !productosArmados.isEmpty()}" class="text-center"
                         th:each="productoArmado : ${productosArmados}">
-                        <td><img th:src="'http://www.imagenestaller.free.nf/' + ${productoArmado.imagen}"
+                        <td><img th:src="'https://Carla-Stramandinoli.github.io/imagenes-taller/imagenes/' + ${productoArmado.imagen}"
                                  style="height: 30px; width: 30px"></td>
                         <td th:utext="${productoArmado.nombre} + '<br><b> Armado ' + ${productoArmado.numeroDeArmadoAlQuePertenece} + '</b>'"></td>
                         <td class="precioTotalDelProducto" th:text="'$' + ${productoArmado.precioFormateado}"></td>
