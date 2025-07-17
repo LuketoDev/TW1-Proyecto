@@ -24,7 +24,7 @@ public class ServicioCategoriasTest {
         List<CategoriaDto> categorias = serviceCategorias.getCategorias();
 
         assertThat(categorias, is(not(empty())));
-        assertThat(categorias.size(), is(9));
+        assertThat(categorias.size(), is(10));
     }
     @Test
     public void cuandoPidoLaPrimerCategoriaMeDevuelveProcesador() {
