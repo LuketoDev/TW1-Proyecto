@@ -47,7 +47,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const mensajeParaAlert = document.getElementById("mensajeDescuento");
     const contenidoMensaje = document.getElementById("contenidoMensaje");
 
-
     if (boton) {
         boton.addEventListener("click", function () {
             const codigo = input.value.trim();
@@ -55,8 +54,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
             fetch('/carritoDeCompras/aplicarDescuento', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({codigoInput: codigo})
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ codigoInput: codigo })
             })
                 .then(response => response.json())
                 .then(data => {
@@ -67,21 +66,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     if (data.valorTotal) {
                         const valorTotalElement = document.querySelector('.valorTotalDelCarrito');
-                        if (valorTotalElement) {
-                            if (!valorTotalElement.dataset.valorOriginal) {
-                                const valorActualTexto = valorTotalElement.textContent || valorTotalElement.innerHTML;
-                                const valorLimpio = parseFloat(valorActualTexto.replace(/[^\d.-]/g, ''));
-                                valorTotalElement.dataset.valorOriginal = valorLimpio;
-                            }
-
-                            valorTotalElement.dataset.valorConDescuento = data.valorTotal;
-                            valorTotalElement.innerHTML = `$${data.valorTotal}`;
-                        }
+                        valorTotalElement.dataset.valorConDescuento = data.valorTotal;
+                        valorTotalElement.innerHTML = `$${data.valorTotal}`;
                     }
-                })
-                .catch(error => {
-                    contenidoMensaje.textContent = 'Hubo un error al aplicar el descuento.';
-                    mensajeParaAlert.classList.remove("d-none");
                 });
         });
     }
@@ -94,24 +81,29 @@ document.addEventListener("DOMContentLoaded", function () {
         formularioPago.addEventListener("submit", function (e) {
             e.preventDefault();
 
-            let metodoSeleccionado = document.querySelector('input[name="metodoPago"]:checked');
-            if (metodoSeleccionado === null) {
-                const errorDiv = document.getElementById("errorMetodoPago");
+            const formaDeEntrega = document.querySelector('input[name="tipoEntrega"]:checked')?.value;
+            const codigoPostal = document.getElementById("codigoPostal").value;
+            const metodoSeleccionado = document.querySelector('input[name="metodoPago"]:checked');
+            const errorDiv = document.getElementById("errorMetodoPago");
+            const btnComprar = document.getElementById("btnComprar");
+
+            if (!metodoSeleccionado) {
                 errorDiv.innerText = "Debes seleccionar un metodo de pago";
                 errorDiv.classList.remove("d-none");
                 return false;
             }
 
-            const errorDiv = document.getElementById("errorMetodoPago");
             errorDiv.classList.add("d-none");
 
-            const btnComprar = document.getElementById("btnComprar");
-
+            const valorTotalElement = document.querySelector('.valorTotalDelCarrito');
+            const valorConDescuento = valorTotalElement?.dataset?.valorConDescuento || "";
 
             const params = new URLSearchParams();
             params.append('metodoPago', metodoSeleccionado.value);
-            const valorTotalElement = document.querySelector('.valorTotalDelCarrito');
-            params.append('totalConDescuento',valorTotalElement.dataset.valorConDescuento);
+            params.append('formaEntrega', formaDeEntrega);
+            params.append('codigoPostal', codigoPostal);
+            params.append('totalConDescuento', valorConDescuento);
+
 
             fetch('/carritoDeCompras/formularioPago', {
                 method: 'POST',
@@ -132,12 +124,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     if (data.success && metodoSeleccionado.value === "mercadoPago") {
                         crearFormularioMercadoPago(data);
-                        btnComprar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Redirigiendo a MercadoPago...';
+                        btnComprar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Redirigiendo a mercado pago...';
                         btnComprar.disabled = true;
                     }
                     if ( data.success && metodoSeleccionado.value === "tarjetaCredito" && data.redirect ) {
                         window.location.href = data.redirect;
-                        btnComprar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Redirigiendo a Tarjeta de credito...';
+                        btnComprar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Redirigiendo a tarjeta de credito...';
+                        btnComprar.disabled = true;
+                    }
+
+                    if ( data.success && metodoSeleccionado.value === "efectivo" && data.redirect ) {
+                        window.location.href = data.redirect;
+                        btnComprar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Redirigiendo';
                         btnComprar.disabled = true;
                     }
 
@@ -235,6 +233,10 @@ function calcularConAjax(codigoPostal) {
                 if (!parrafoTotal) {
                     parrafoTotal = document.createElement('p');
                     parrafoTotal.className = 'total-con-envio';
+                    parrafoTotal.style.fontSize = "25px";
+                    parrafoTotal.style.fontWeight = "bold";
+
+
                     document.getElementById('btnComprar').parentElement.insertBefore(parrafoTotal, document.getElementById('btnComprar').parentElement.firstChild);
                 }
 
@@ -282,3 +284,22 @@ function formatearPrecio(valor) {
         minimumFractionDigits: 2
     }).format(valor);
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    const radioRetiro = document.getElementById("retiro");
+    const radioEnvio = document.getElementById("envio");
+    const seccionEnvio = document.getElementById("seccion-envio");
+
+    function actualizarVisibilidadEnvio() {
+        if (radioEnvio.checked) {
+            seccionEnvio.style.display = "block";
+        } else {
+            seccionEnvio.style.display = "none";
+        }
+    }
+
+    radioRetiro.addEventListener("change", actualizarVisibilidadEnvio);
+    radioEnvio.addEventListener("change", actualizarVisibilidadEnvio);
+
+    actualizarVisibilidadEnvio(); // Para que tome el estado inicial
+});

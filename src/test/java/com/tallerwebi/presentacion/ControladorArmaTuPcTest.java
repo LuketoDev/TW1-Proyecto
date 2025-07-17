@@ -248,7 +248,7 @@ public class ControladorArmaTuPcTest {
 
         // Verificación (Assert)
         assertThat(mav.getViewName(), equalTo("redirect:/arma-tu-pc/tradicional/memoria"));
-        assertThat(mav.getModelMap().get("errorLimite"), equalTo("Supero el limite de memoria de su armado"));
+        assertThat(mav.getModelMap().get("errorLimite"), equalTo("Supero el limite de memoria de este tipo en su armado"));
         verify(sessionMock, never()).setAttribute(eq("armadoPcDto"), any());
     }
 
@@ -355,6 +355,7 @@ public class ControladorArmaTuPcTest {
 
         when(sessionMock.getAttribute("carritoSesion")).thenReturn(carritoActual);
         when(servicioArmaTuPcMock.pasajeAProductoArmadoDtoParaAgregarAlCarrito(armadoPcDtoMock)).thenReturn(productosDelArmado);
+        when(servicioArmaTuPcMock.configurarNumeroDeArmadoYEscencialidadAProductosCarritoArmadoDto(anyInt(), anyList())).thenReturn(productosDelArmado);
         when(sessionMock.getAttribute("reservaArmado")).thenReturn(productosDelArmado);
 
         // Ejecución (Act)

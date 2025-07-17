@@ -153,9 +153,9 @@ public class ServicioProductoEspecificoImpl implements ServicioProductoEspecific
         if (componenteActual instanceof PlacaDeVideo) {
             for (Componente componente : componentesAComparar) {
                 if (!componente.equals(componenteActual)
-                    && componente.getPrecio() > 0.0
-                    && ((PlacaDeVideo) componente).getCapacidadRAM() != null
-                    && ((PlacaDeVideo) componente).getCapacidadRAM().equals(((PlacaDeVideo) componenteActual).getCapacidadRAM())) {
+                        && componente.getPrecio() > 0.0
+                        && ((PlacaDeVideo) componente).getCapacidadRAM() != null
+                        && ((PlacaDeVideo) componente).getCapacidadRAM().equals(((PlacaDeVideo) componenteActual).getCapacidadRAM())) {
                     componentesADevolver.add( new ComponenteEspecificoDto(componente));
                 }
                 if (!componente.equals(componenteActual)
@@ -183,8 +183,8 @@ public class ServicioProductoEspecificoImpl implements ServicioProductoEspecific
             for (Componente componente : componentesAComparar) {
                 if (!componente.equals(componenteActual)) {
                     if (((Almacenamiento) componente).getCapacidad().equals(((Almacenamiento) componenteActual).getCapacidad())
-                        && ((Almacenamiento) componente).getTipoDeDisco().equals(((Almacenamiento) componenteActual).getTipoDeDisco())
-                        && ((Almacenamiento) componente).getTipoDeConexion().equals(((Almacenamiento) componenteActual).getTipoDeConexion())) {
+                            && ((Almacenamiento) componente).getTipoDeDisco().equals(((Almacenamiento) componenteActual).getTipoDeDisco())
+                            && ((Almacenamiento) componente).getTipoDeConexion().equals(((Almacenamiento) componenteActual).getTipoDeConexion())) {
                         componentesADevolver.add( new ComponenteEspecificoDto(componente));
                     }
                 }
@@ -237,11 +237,11 @@ public class ServicioProductoEspecificoImpl implements ServicioProductoEspecific
         if (componenteActual instanceof Monitor) {
             for (Componente componente : componentesAComparar) {
                 if (!componente.equals(componenteActual)
-                    && ((Monitor) componente).getTipoDePanel().equals(((Monitor) componenteActual).getTipoDePanel())
-                    && ((Monitor) componente).getPulgadas().equals(((Monitor) componenteActual).getPulgadas())) {
+                        && ((Monitor) componente).getTipoDePanel().equals(((Monitor) componenteActual).getTipoDePanel())
+                        && ((Monitor) componente).getPulgadas().equals(((Monitor) componenteActual).getPulgadas())) {
                     componentesADevolver.add(new ComponenteEspecificoDto(componente));
                 } else if (!componente.equals(componenteActual)
-                            && ((Monitor) componente).getPulgadas().equals(((Monitor) componenteActual).getPulgadas())) {
+                        && ((Monitor) componente).getPulgadas().equals(((Monitor) componenteActual).getPulgadas())) {
                     componentesADevolver.add(new ComponenteEspecificoDto(componente));
                 }
                 if (!componente.equals(componenteActual)
@@ -266,9 +266,9 @@ public class ServicioProductoEspecificoImpl implements ServicioProductoEspecific
         if (componenteActual instanceof CoolerCPU) {
             for (Componente componente : componentesAComparar) {
                 if (!componente.equals(componenteActual)
-                    && componente.getPrecio() > 0.0
-                    && ((CoolerCPU) componente).getTipoDeDisipacion().equals(((CoolerCPU) componenteActual).getTipoDeDisipacion())
-                    && ((CoolerCPU) componente).getCantCoolersIncluidos().equals(((CoolerCPU) componenteActual).getCantCoolersIncluidos())) {
+                        && componente.getPrecio() > 0.0
+                        && ((CoolerCPU) componente).getTipoDeDisipacion().equals(((CoolerCPU) componenteActual).getTipoDeDisipacion())
+                        && ((CoolerCPU) componente).getCantCoolersIncluidos().equals(((CoolerCPU) componenteActual).getCantCoolersIncluidos())) {
                     componentesADevolver.add(new ComponenteEspecificoDto(componente));
                 }
                 if (!componente.equals(componenteActual)
@@ -277,7 +277,7 @@ public class ServicioProductoEspecificoImpl implements ServicioProductoEspecific
                     //Son los componentes de la misma marca y tipo
                     todosLosComponentesComoPrimeraOpcion.add(new ComponenteEspecificoDto(componente));
                 } else if (!componente.equals(componenteActual)
-                            && componente.getPrecio() > 0.0){
+                        && componente.getPrecio() > 0.0){
                     //Son todos los componentes del mismo tipo
                     todosLosComponentesComoSegundaOpcion.add(new ComponenteEspecificoDto(componente));
                 }
@@ -295,7 +295,7 @@ public class ServicioProductoEspecificoImpl implements ServicioProductoEspecific
         if (componenteActual instanceof Gabinete) {
             for (Componente componente : componentesAComparar) {
                 if (!componente.equals(componenteActual)
-                    && ((Gabinete) componente).getTamanioGabinete().equals(((Gabinete) componenteActual).getTamanioGabinete())) {
+                        && ((Gabinete) componente).getTamanioGabinete().equals(((Gabinete) componenteActual).getTamanioGabinete())) {
                     componentesADevolver.add(new ComponenteEspecificoDto(componente));
                 }
                 if (!componente.equals(componenteActual)
