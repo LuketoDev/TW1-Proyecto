@@ -1,6 +1,5 @@
 package com.tallerwebi.presentacion;
 
-import com.tallerwebi.dominio.ServicioCompra;
 import com.tallerwebi.dominio.ServicioDeEnviosImpl;
 import com.tallerwebi.dominio.ServicioPrecios;
 import com.tallerwebi.dominio.ServicioProductoCarritoImpl;
@@ -22,7 +21,10 @@ public class CarritoController {
     public String codigoPostalActual;
     public EnvioDto envioActual;
 
-    public CarritoController(ServicioProductoCarritoImpl servicioProductoCarritoImpl, ServicioDeEnviosImpl servicioDeEnvios, ServicioPrecios servicioPrecios, ServicioCompra servicioCompra) {
+    public CarritoController(ServicioProductoCarritoImpl servicioProductoCarritoImpl,
+                             ServicioDeEnviosImpl servicioDeEnvios,
+                             ServicioPrecios servicioPrecios
+                             ) {
         this.servicioProductoCarrito = servicioProductoCarritoImpl;
         this.servicioDeEnvios = servicioDeEnvios;
         this.servicioPrecios = servicioPrecios;
@@ -45,7 +47,8 @@ public class CarritoController {
             String totalProductoFormateado = this.servicioPrecios.conversionDolarAPeso(totalPorProducto);
             producto.setPrecioFormateado(totalProductoFormateado);
 
-            if(producto instanceof ProductoCarritoArmadoDto) productosDeArmados.add((ProductoCarritoArmadoDto)producto);
+            if (producto instanceof ProductoCarritoArmadoDto)
+                productosDeArmados.add((ProductoCarritoArmadoDto) producto);
             else productosFueraDeArmado.add(producto);
         }
 
@@ -77,7 +80,8 @@ public class CarritoController {
             String totalProductoFormateado = this.servicioPrecios.conversionDolarAPeso(totalPorProducto);
             producto.setPrecioFormateado(totalProductoFormateado);
 
-            if(producto instanceof ProductoCarritoArmadoDto) productosDeArmados.add((ProductoCarritoArmadoDto)producto);
+            if (producto instanceof ProductoCarritoArmadoDto)
+                productosDeArmados.add((ProductoCarritoArmadoDto) producto);
             else productosFueraDeArmado.add(producto);
         }
 
@@ -100,7 +104,8 @@ public class CarritoController {
                     "/carritoDeCompras/eliminarProducto/{id}/{numeroDeArmado}"
             },
             method = RequestMethod.POST
-    )     @ResponseBody
+    )
+    @ResponseBody
     public Map<String, Object> eliminarProductoDelCarrito(
             @PathVariable Long id,
             @PathVariable(value = "numeroDeArmado", required = false) Integer numeroDeArmado,
@@ -113,11 +118,24 @@ public class CarritoController {
 
         if (numeroDeArmado != null) {
             productoBuscado = this.servicioProductoCarrito.buscarPorIdYNumeroDeArmado(id, numeroDeArmado);
+
+            // aca habria que ver si el producto es escencial, si lo es habria que devolver una lista de productos a eliminar y devolver el stock
         } else {
             productoBuscado = this.servicioProductoCarrito.buscarPorId(id);
         }
 
-        if (productoBuscado != null) {
+        if(productoBuscado != null
+                && productoBuscado instanceof ProductoCarritoArmadoDto
+                && ((ProductoCarritoArmadoDto)productoBuscado).getEsEscencialParaElArmado()){
+
+            List<ProductoCarritoArmadoDto> productosDelArmado = this.servicioProductoCarrito.obtenerProductosCarritoArmadoDtoPorNumeroDeArmado(((ProductoCarritoArmadoDto)productoBuscado).getNumeroDeArmadoAlQuePertenece());
+
+            for (ProductoCarritoArmadoDto productoDeArmado : productosDelArmado) {
+                this.servicioProductoCarrito.devolverStockAlComponente(productoDeArmado.getId(), productoDeArmado.getCantidad());
+                this.servicioProductoCarrito.getProductos().remove(productoDeArmado);
+            }
+            response.put("eliminado", true);
+        } else if (productoBuscado != null) {
             this.servicioProductoCarrito.devolverStockAlComponente(id, productoBuscado.getCantidad());
             this.servicioProductoCarrito.getProductos().remove(productoBuscado);
             response.put("eliminado", true);
@@ -157,7 +175,7 @@ public class CarritoController {
     @ResponseBody
     //este metodo solo se usa para enviar un mensaje de respuesta al cliente cuando se aplica un descuento
     public Map<String, Object> calcularValorTotalDeLosProductosConDescuento
-            (@RequestBody Map<String, String> codigoDescuentoMap) {
+            (@RequestBody Map<String, String> codigoDescuentoMap, HttpSession session) {
         String codigoDescuento = codigoDescuentoMap.get("codigoInput");
 
         Integer codigoDescuentoExtraido = extraerPorcentajeDesdeCodigoDeDescuento(codigoDescuento);
@@ -172,8 +190,11 @@ public class CarritoController {
 
         String valorTotalFormateado = this.servicioPrecios.conversionDolarAPeso(valorTotalConDescuento);
 
+        session.setAttribute("totalConDescuento", valorTotalFormateado);
+        session.setAttribute("totalConDescuentoNoFormateado", valorTotalConDescuento);
+
         response.put("mensaje", "Descuento aplicado! Nuevo total: $" + valorTotalFormateado);
-        response.put("valorTotal", valorTotalFormateado);
+        response.put("valorTotal", valorTotalConDescuento);
 
         return response;
     }
@@ -184,7 +205,8 @@ public class CarritoController {
                     "/carritoDeCompras/agregarMasCantidadDeUnProducto/{id}/{numeroDeArmado}"
             },
             method = RequestMethod.POST
-    )    @ResponseBody
+    )
+    @ResponseBody
     public Map<String, Object> agregarMasCantidadDeUnProducto(
             @PathVariable Long id,
             @PathVariable(value = "numeroDeArmado", required = false) Integer numeroDeArmado,
@@ -232,7 +254,8 @@ public class CarritoController {
                     "/carritoDeCompras/restarCantidadDeUnProducto/{id}/{numeroDeArmado}"
             },
             method = RequestMethod.POST
-    )    @ResponseBody
+    )
+    @ResponseBody
     public Map<String, Object> restarCantidadDeUnProducto(
             @PathVariable Long id,
             @PathVariable(value = "numeroDeArmado", required = false) Integer numeroDeArmado,
@@ -246,6 +269,7 @@ public class CarritoController {
 
         if (numeroDeArmado != null) {
             productoBuscado = this.servicioProductoCarrito.buscarPorIdYNumeroDeArmado(id, numeroDeArmado);
+            // aca si el producto que resta es de armado y es escencial debe eliminar todos los productos que son de tal armado y devolver su stock
         } else {
             productoBuscado = this.servicioProductoCarrito.buscarPorId(id);
         }
@@ -261,6 +285,24 @@ public class CarritoController {
             response.put("precioTotalDelProducto", totalFormateadoPorProducto);
 
             response.put("eliminado", false);
+
+            Double totalGeneral = this.servicioProductoCarrito.calcularValorTotalDeLosProductos();
+            String totalGeneralFormateado = this.servicioPrecios.conversionDolarAPeso(totalGeneral);
+            response.put("valorTotal", totalGeneralFormateado);
+
+            response.put("cantidadEnCarrito", this.servicioProductoCarrito.calcularCantidadTotalDeProductos());
+
+        } else if(productoBuscado != null
+                && productoBuscado instanceof ProductoCarritoArmadoDto
+                && ((ProductoCarritoArmadoDto)productoBuscado).getEsEscencialParaElArmado()) {
+
+            List<ProductoCarritoArmadoDto> productosDelArmado = this.servicioProductoCarrito.obtenerProductosCarritoArmadoDtoPorNumeroDeArmado(((ProductoCarritoArmadoDto) productoBuscado).getNumeroDeArmadoAlQuePertenece());
+
+            for (ProductoCarritoArmadoDto productoDeArmado : productosDelArmado) {
+                this.servicioProductoCarrito.devolverStockAlComponente(productoDeArmado.getId(), productoDeArmado.getCantidad());
+                this.servicioProductoCarrito.getProductos().remove(productoDeArmado);
+            }
+            response.put("eliminado", true);
 
             Double totalGeneral = this.servicioProductoCarrito.calcularValorTotalDeLosProductos();
             String totalGeneralFormateado = this.servicioPrecios.conversionDolarAPeso(totalGeneral);
@@ -287,13 +329,21 @@ public class CarritoController {
 
     @PostMapping(path = "/carritoDeCompras/formularioPago")
     @ResponseBody
-    public Map<String, Object> procesarCompra(@RequestParam(value = "metodoPago") String metodoDePago, HttpSession session) {
+    public Map<String, Object> procesarCompra(
+            @RequestParam(value = "metodoPago") String metodoDePago,
+            @RequestParam(value = "formaEntrega") String formaEntrega,
+            @RequestParam(value = "codigoPostal", required = false) String codigoPostal,
+            @RequestParam(value = "totalConDescuento", required = false) Double totalConDescuento,
+            HttpSession session
+    ) {
         Map<String, Object> response = new HashMap<>();
         // para obtener el usuario que esta logueado
         UsuarioDto usuarioLogueado = (UsuarioDto) session.getAttribute("usuario");
         List<ProductoCarritoDto> carritoSesion = obtenerCarritoDeSesion(session);
+        session.setAttribute("formaEntrega", formaEntrega);
+        session.setAttribute("metodoPago", metodoDePago);
 
-        if( carritoSesion == null || carritoSesion.isEmpty()) {
+        if (carritoSesion == null || carritoSesion.isEmpty()) {
             response.put("success", false);
             response.put("error", "No hay productos en el carrito");
             return response;
@@ -305,15 +355,15 @@ public class CarritoController {
             return response;
         }
 
-        if(usuarioLogueado == null) {
+        if (usuarioLogueado == null) {
             response.put("success", false);
             response.put("error", "Debes iniciar sesion");
-            response.put("redirect", "/login");
-//            response.put("redirect", "/login?redirectUrl=/carritoDeCompras/formularioPago");
             return response;
         }
 
-        if (this.envioActual == null || this.codigoPostalActual == null) {
+        if ((formaEntrega.equalsIgnoreCase("envio") &&
+                (codigoPostal == null || codigoPostal.isEmpty()) &&
+                (this.envioActual == null || this.codigoPostalActual == null))) {
             response.put("success", false);
             response.put("error", "Debes agregar un codigo postal");
             return response;
@@ -324,10 +374,21 @@ public class CarritoController {
             response.put("redirect", "/tarjetaDeCredito");
             return response;
         }
+
+        if (metodoDePago.equalsIgnoreCase("efectivo")) {
+            response.put("success", true);
+            response.put("redirect", "/finalizarPagoEfectivo");
+            return response;
+        }
+
         if ("mercadoPago".equalsIgnoreCase(metodoDePago)) {
             response.put("success", true);
             response.put("metodoPago", "mercadoPago");
-            response.put("costoEnvio", envioActual.getCosto());
+            if ("envio".equalsIgnoreCase(formaEntrega) && envioActual != null) {
+                response.put("costoEnvio", envioActual.getCosto());
+            } else {
+                response.put("costoEnvio", 0.0);
+            }
             return response;
         } else {
             response.put("success", false);
@@ -352,13 +413,12 @@ public class CarritoController {
                 //se guardan los valores para pasarselo a procesarCompra y usar en MP despues
                 this.envioActual = envio;
                 this.codigoPostalActual = codigoPostal;
-
                 response.put("success", true);
                 response.put("costo", envio.getCosto());
                 response.put("tiempo", envio.getTiempo());
                 response.put("destino", envio.getDestino());
                 session.setAttribute("costo", envio.getCosto());
-                session.setAttribute("tiempo",envio.getTiempo());
+                session.setAttribute("tiempo", envio.getTiempo());
                 session.setAttribute("destino", envio.getDestino());
                 response.put("valorTotal", this.servicioProductoCarrito.valorTotal);
             } else {

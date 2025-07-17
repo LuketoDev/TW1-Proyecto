@@ -38,8 +38,6 @@ public class ControladorCarritoTest {
     @Mock
     private HttpSession httpSessionMock;
     @Mock
-    private ServicioCompraImpl servicioCompraMock;
-    @Mock
     private ProductoCarritoArmadoDto productoCarritoArmadoDto;
 
     private CarritoController carritoController;
@@ -48,7 +46,7 @@ public class ControladorCarritoTest {
     @BeforeEach
     public void init() {
         MockitoAnnotations.openMocks(this);
-        carritoController = new CarritoController(servicioProductoCarritoImplMock, servicioEnviosMock, servicioPreciosMock, servicioCompraMock);
+        carritoController = new CarritoController(servicioProductoCarritoImplMock, servicioEnviosMock, servicioPreciosMock);
         carritoSesion = new ArrayList<>();
 
     }
@@ -189,7 +187,7 @@ public class ControladorCarritoTest {
         Map<String, String> inputConDescuento = new HashMap<>();
         inputConDescuento.put("codigoInput", "baratija5");
 
-        Map<String, Object> porcentajeDescuento = carritoController.calcularValorTotalDeLosProductosConDescuento(inputConDescuento);
+        Map<String, Object> porcentajeDescuento = carritoController.calcularValorTotalDeLosProductosConDescuento(inputConDescuento, httpSessionMock);
 
         assertThat(porcentajeDescuento.get("mensaje"), equalTo("Descuento aplicado! Nuevo total: $384.037,50"));
         assertThat(porcentajeDescuento.get("valorTotal"), equalTo("384.037,50"));
@@ -219,7 +217,7 @@ public class ControladorCarritoTest {
         Map<String, String> inputConDescuento = new HashMap<>();
         inputConDescuento.put("codigoInput", "baratija10");
 
-        Map<String, Object> porcentajeDescuento = carritoController.calcularValorTotalDeLosProductosConDescuento(inputConDescuento);
+        Map<String, Object> porcentajeDescuento = carritoController.calcularValorTotalDeLosProductosConDescuento(inputConDescuento, httpSessionMock);
 
         assertThat(porcentajeDescuento.get("mensaje"), equalTo("Descuento aplicado! Nuevo total: $363.825,00"));
         assertThat(porcentajeDescuento.get("valorTotal"), equalTo("363.825,00"));
@@ -246,7 +244,7 @@ public class ControladorCarritoTest {
         Map<String, String> inputConDescuento = new HashMap<>();
         inputConDescuento.put("codigoInput", "baratija15");
 
-        Map<String, Object> porcentajeDescuento = carritoController.calcularValorTotalDeLosProductosConDescuento(inputConDescuento);
+        Map<String, Object> porcentajeDescuento = carritoController.calcularValorTotalDeLosProductosConDescuento(inputConDescuento, httpSessionMock);
 
         assertThat(porcentajeDescuento.get("mensaje"), equalTo("Descuento aplicado! Nuevo total: $343.612,50"));
         assertThat(porcentajeDescuento.get("valorTotal"), equalTo("343.612,50"));
@@ -260,7 +258,7 @@ public class ControladorCarritoTest {
         Map<String, String> input = new HashMap<>();
         input.put("codigoInput", "descuento99");
 
-        Map<String, Object> response = carritoController.calcularValorTotalDeLosProductosConDescuento(input);
+        Map<String, Object> response = carritoController.calcularValorTotalDeLosProductosConDescuento(input, httpSessionMock);
 
         assertThat(response.get("mensajeDescuento"), equalTo("Codigo de descuento invalido!"));
         assertTrue(response.containsKey("mensajeDescuento"));
@@ -364,7 +362,7 @@ public class ControladorCarritoTest {
         usuarioLogueado.setEmail("test@example.com");
         when(httpSessionMock.getAttribute("usuario")).thenReturn(usuarioLogueado);
 
-        Map<String, Object> response = carritoController.procesarCompra(metodoPagoValido, httpSessionMock);
+        Map<String, Object> response = carritoController.procesarCompra(metodoPagoValido, null,  null, null, httpSessionMock);
 
         assertFalse((Boolean) response.get("success"));
         assertEquals("Debes agregar un codigo postal", response.get("error"));
@@ -389,7 +387,7 @@ public class ControladorCarritoTest {
         carritoController.envioActual = envioDto;
         carritoController.codigoPostalActual = "1704";
 
-        Map<String, Object> response = carritoController.procesarCompra(metodoPagoValido, httpSessionMock);
+        Map<String, Object> response = carritoController.procesarCompra(metodoPagoValido, null, null, null, httpSessionMock);
 
         assertTrue((Boolean) response.get("success"));
         assertEquals("mercadoPago", response.get("metodoPago"));
@@ -401,7 +399,7 @@ public class ControladorCarritoTest {
         carritoSesion.add(productoMock1);
         when(httpSessionMock.getAttribute("carritoSesion")).thenReturn(carritoSesion);
 
-        Map<String, Object> response = carritoController.procesarCompra(null, httpSessionMock);
+        Map<String, Object> response = carritoController.procesarCompra(null,null, null, null, httpSessionMock);
 
         assertEquals(false, response.get("success"));
         assertEquals("Debes seleccionar un metodo de pago", response.get("error"));
@@ -417,7 +415,7 @@ public class ControladorCarritoTest {
         carritoSesion.add(productoMock1);
         when(httpSessionMock.getAttribute("carritoSesion")).thenReturn(carritoSesion);
 
-        Map<String, Object> response = carritoController.procesarCompra(metodoPagoValido, httpSessionMock);
+        Map<String, Object> response = carritoController.procesarCompra(metodoPagoValido, null, null, null, httpSessionMock);
 
         assertFalse((Boolean) response.get("success"));
         assertEquals("Debes iniciar sesion", response.get("error"));
@@ -430,7 +428,7 @@ public class ControladorCarritoTest {
 
         when(httpSessionMock.getAttribute("carritoSesion")).thenReturn(carritoSesion);
 
-        Map<String, Object> response = carritoController.procesarCompra(metodoPago, httpSessionMock);
+        Map<String, Object> response = carritoController.procesarCompra(metodoPago, null, null, null, httpSessionMock);
 
         assertFalse((Boolean) response.get("success"));
         assertEquals("No hay productos en el carrito", response.get("error"));
@@ -443,7 +441,7 @@ public class ControladorCarritoTest {
         carritoSesion.add(productoMock1);
         when(httpSessionMock.getAttribute("carritoSesion")).thenReturn(carritoSesion);
 
-        Map<String, Object> response = carritoController.procesarCompra(metodoPagoVacio, httpSessionMock);
+        Map<String, Object> response = carritoController.procesarCompra(metodoPagoVacio, null, null, null, httpSessionMock);
 
         assertEquals(false, response.get("success"));
         assertEquals("Debes seleccionar un metodo de pago", response.get("error"));
@@ -466,7 +464,7 @@ public class ControladorCarritoTest {
         carritoController.envioActual = envioDto;
         carritoController.codigoPostalActual = "1704";
 
-        Map<String, Object> response = carritoController.procesarCompra(metodoPago, httpSessionMock);
+        Map<String, Object> response = carritoController.procesarCompra(metodoPago, null, null, null, httpSessionMock);
 
         assertTrue((Boolean) response.get("success"));
         assertEquals("/tarjetaDeCredito", response.get("redirect"));
